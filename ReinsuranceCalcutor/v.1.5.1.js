@@ -880,7 +880,7 @@ $(function () {
                 if (currentLoss < XoL_MaxLimit && currentLoss > XoL_AP) {
                     // check Agg before anything else
                     if (totalLoss > agg_AP) {
-                        agg_current_payout = currentLoss
+                        agg_current_payout = XoL_AP
                         console.log('here')
                         if (aggCheckpoint === 0) {
                             agg_current_payout = agg_AP - (totalLoss - currentLoss)
