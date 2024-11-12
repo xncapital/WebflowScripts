@@ -506,13 +506,13 @@ $(function () {
                 dotPosition($newblock, 0, defaultWidth * index);
             } else if (type === 'agg') {
                 $newblock.show();
-                
+
                 $newblock.css('width', `${aggBlockWidth}px`);
 
                 $newblock.css('border-top-right-radius', `${$('.reinsurance--graph--block.base').eq(aggBlockIndex).css('border-top-right-radius')}`);
                 $newblock.css('height', `${usdPixelUnit_y * currentLoss}px`);
                 if (currentLoss > xol_ap) $newblock.css('height', `${usdPixelUnit_y * xol_ap}px`);
-                if(!isXolActive && isAggActive && !isQuotaActive) $newblock.css('height', `${$('.reinsurance--graph--block.base').eq(aggBlockIndex).css('height')}`);
+                if (!isXolActive && isAggActive && !isQuotaActive) $newblock.css('height', `${$('.reinsurance--graph--block.base').eq(aggBlockIndex).css('height')}`);
                 dotPosition($newblock, 0, aggPosition);
                 $newblock.css('top', `${$('.reinsurance--graph--block.base').eq(aggBlockIndex).css('top')}`);
                 if ($('.reinsurance--graph--block.base').eq(aggBlockIndex).css('left') === $newblock.css('left')) {
@@ -835,6 +835,31 @@ $(function () {
 
         } else if (!isXolActive && !isAggActive && isQuotaActive) {
             console.log('state 4');
+            let currentQuota_payout = 0
+            let totalQuota = 0
+
+
+            $('.reinsurance--slider--card.loss').find('.reinsurance--input').each((index, element) => {
+                let currentLoss = parseToNumber($(element).val());
+
+                totalLoss = totalLoss + currentLoss;
+
+                if (currentLoss > XoL_MaxLimit) {
+                    currentQuota_payout = XoL_MaxLimit * quotaPercentage
+                    newBalance = newBalance - currentLoss + XoL_MaxLimit * insurerPercentage;
+                } else {
+                    currentQuota_payout = currentLoss * quotaPercentage
+                    newBalance = newBalance - currentLoss * insurerPercentage
+                }
+
+                totalQuota = totalQuota + currentQuota_payout
+            });
+
+
+            // Display the new balance and XoL Payout using the formatting utility
+            cardBalance.text(formatToDollar(newBalance));
+            cardQuotaPayout.text(formatToDollar(totalQuota))
+
         } else if (isXolActive && !isAggActive && !isQuotaActive) {
             console.log('state 5');
 
