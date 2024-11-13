@@ -897,7 +897,6 @@ $(function () {
             dotPosition(dotAggAp, - 64, dotAggAp.css('left'))
 
         } else if (isXolActive && !isAggActive && isQuotaActive) {
-            dotXolAp.css('display', 'flex')
             dotMaxLimit.css('display', 'flex')
             sideLabelAp.css('display', 'flex')
             sideLabelMax.css('display', 'flex')
