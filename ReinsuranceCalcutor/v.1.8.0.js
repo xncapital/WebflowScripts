@@ -506,6 +506,7 @@ $(function () {
             const aggBlocks = $('.reinsurance--graph--block.agg')
 
             let totalLoss = 0
+            let relativePosition = 88
             baseBlocks.each((index, element) => {
                 let currentLoss = parseToNumber($('.reinsurance--slider--card.loss').find('.reinsurance--input').eq(index).val());
                 totalLoss = totalLoss + currentLoss
@@ -533,6 +534,8 @@ $(function () {
                         $(baseBlocks_excess).eq(index).find('.reinsurance--block--value').text(`- ${formatLargeNumber(captivePayouts_array_above_max[index])}`)
                     }
 
+                    console.log(aggCheckpoint)
+
                     if (aggPayouts_array[index] > 0) {
                         $(aggBlocks).eq(index).css('display', 'flex')
                         $(aggBlocks).eq(index).css('height', `${(captivePayouts_array[index] + aggPayouts_array[index]) * usdPixelUnit_y}px`);
@@ -543,6 +546,7 @@ $(function () {
                             aggCheckpointWidth = 84
                             $(aggBlocks).eq(index).css('width', `${aggCheckpointWidth}`);
                             $(element).remove()
+                            relativePosition = 84 + aggCheckpoint * 84 + aggCheckpoint * (8) - 42
                         } else if (index === aggCheckpoint && aggPayouts_array[index] !== xol_ap && captivePayouts_array[index] !== 0) {
                             $(aggBlocks).eq(index).css('font-size', `10px`);
                             $(aggBlocks).eq(index).css('border-top-left-radius', `0px`);
@@ -571,11 +575,17 @@ $(function () {
                     const minOffset = 4; // The offset when totalLoss is close to agg_ap
 
                     relativePosition = 84 + index * 84 + index * 8 + (maxOffset - progress * (maxOffset - minOffset));
+                } else if (aggCheckpoint < 0) {
+                    relativePosition = 88 + index * 88
                 }
+
 
             });
 
 
+            if (aggCheckpoint === 0) {
+                relativePosition = 88
+            }
             dotPosition(dotAggAp, 9, relativePosition)
             dotPosition(aggLine, 0, relativePosition)
             dotAggAp.css('display', 'flex')
@@ -836,13 +846,15 @@ $(function () {
 
                         }
 
-                        aggCheckpoint = -2
+                        aggCheckpoint = 0
 
                     } else {
                         if (aggCheckpoint === -1) aggCheckpoint = index
 
                         if (aggCheckpoint === index) {
                             if (currentLoss > XoL_AP) {
+                                
+
                                 agg_and_captive_payout = XoL_AP //Q2 + Q4
                                 //console.log('agg_and_captive_payout', agg_and_captive_payout)
                                 let Q2 = howMuchLeftToAgg
@@ -850,6 +862,12 @@ $(function () {
                                 if (Q4 === 0) Q4 = XoL_AP
 
                                 agg_current_payout = Q4
+
+                                if (currentLoss > XoL_MaxLimit && (previousLosses + XoL_AP) <= agg_AP) {
+                                    console.log('HERE')
+                                    howMuchLeftToAgg = 0
+                                    agg_current_payout = 0
+                                }
 
                             } else {
                                 let Q2 = currentLoss - totalLoss + agg_AP
@@ -868,7 +886,7 @@ $(function () {
                         }
                     }
                 }
-
+                console.log('aggCheckpoint', aggCheckpoint)
                 newBalance = newBalance - (currentLoss - (current_xol_payout + agg_current_payout))
                 XoL_Payout = XoL_Payout + current_xol_payout
                 agg_total_payout = agg_total_payout + agg_current_payout
@@ -890,8 +908,14 @@ $(function () {
 
             //progress bar
             $('#agg-bar--text').closest('.agg-bar').css('display', 'flex')
-            $('#agg-bar--text').text(`${formatLargeNumber(howMuchLeftToAgg)} of ${formatLargeNumber(agg_AP)}`)
-            $('.agg-bar--progress').css('width', `${howMuchLeftToAgg / agg_AP * 100}%`)
+            if (totalLoss < agg_AP) {
+                $('#agg-bar--text').text(`${formatLargeNumber((totalLoss))} of ${formatLargeNumber(agg_AP)}`)
+                $('.agg-bar--progress').css('width', `${(totalLoss) / agg_AP * 100}%`)
+            } else {
+                $('#agg-bar--text').text(`${formatLargeNumber((agg_AP))} of ${formatLargeNumber(agg_AP)}`)
+                $('.agg-bar--progress').css('width', `${100}%`)
+            }
+
 
 
             console.log('captivePayouts_array', captivePayouts_array)
@@ -1106,7 +1130,6 @@ $(function () {
     $('#initialLoss').val('$100,000')
     $('#quota-share--reinsurer').val('50%')
     $('#quota-share--responsibility').val('50%')
-    $('#agg-bar--text').parent().parent().hide()
     $('.agg-bar--progress').css('width', `0%`)
 
     // graph start
